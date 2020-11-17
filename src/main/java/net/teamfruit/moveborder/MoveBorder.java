@@ -92,6 +92,7 @@ public final class MoveBorder extends JavaPlugin {
                     }
 
                     task.cancel();
+                    task = null;
 
                     Bukkit.broadcast(new ComponentBuilder()
                             .append("[かめすたプラグイン] ").color(ChatColor.LIGHT_PURPLE)
