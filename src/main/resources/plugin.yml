@@ -1,0 +1,14 @@
+name: MoveBorder
+version: ${project.version}
+main: net.teamfruit.moveborder.MoveBorder
+api-version: 1.15
+authors: [Kamesuta]
+
+commands:
+  moveborder:
+    permission: moveborder
+    usage: /moveborder <start|stop|vel>
+
+permissions:
+  moveborder:
+    default: op
