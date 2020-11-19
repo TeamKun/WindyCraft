@@ -1,14 +1,14 @@
-name: MoveBorder
+name: WindyCraft
 version: ${project.version}
-main: net.teamfruit.moveborder.MoveBorder
+main: net.teamfruit.windycraft.WindyCraft
 api-version: 1.15
 authors: [Kamesuta]
 
 commands:
-  moveborder:
-    permission: moveborder
-    usage: /moveborder <start|stop|vel>
+  wind:
+    permission: windycraft
+    usage: /wind <start|stop|vel>
 
 permissions:
-  moveborder:
+  windycraft:
     default: op

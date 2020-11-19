@@ -1,17 +1,13 @@
-package net.teamfruit.moveborder;
+package net.teamfruit.windycraft;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.WorldBorder;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import java.util.Collections;
@@ -19,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class MoveBorder extends JavaPlugin {
+public final class WindyCraft extends JavaPlugin {
 
     private Vector vel;
     private BukkitRunnable task;
@@ -50,7 +46,7 @@ public final class MoveBorder extends JavaPlugin {
 
                     sender.sendMessage(new ComponentBuilder()
                             .append("[かめすたプラグイン] ").color(ChatColor.LIGHT_PURPLE)
-                            .append("速度を " + vel + " m/s にセットした").color(ChatColor.GREEN)
+                            .append("風速を " + vel + " m/s にセットした").color(ChatColor.GREEN)
                             .create()
                     );
 
@@ -76,7 +72,7 @@ public final class MoveBorder extends JavaPlugin {
 
                     Bukkit.broadcast(new ComponentBuilder()
                             .append("[かめすたプラグイン] ").color(ChatColor.LIGHT_PURPLE)
-                            .append("ボーダー移動すた～～～～と！！").color(ChatColor.GREEN)
+                            .append("風速すた～～～～と！！").color(ChatColor.GREEN)
                             .create()
                     );
 
@@ -96,7 +92,7 @@ public final class MoveBorder extends JavaPlugin {
 
                     Bukkit.broadcast(new ComponentBuilder()
                             .append("[かめすたプラグイン] ").color(ChatColor.LIGHT_PURPLE)
-                            .append("ボーダー移動ストップ").color(ChatColor.GREEN)
+                            .append("風速ストップ").color(ChatColor.GREEN)
                             .create()
                     );
 
@@ -122,50 +118,25 @@ public final class MoveBorder extends JavaPlugin {
     }
 
     private void tick() {
-        Bukkit.getWorlds().forEach(world -> {
-            if (world.getPlayers().isEmpty())
+        Bukkit.getOnlinePlayers().forEach(p -> {
+            if (p.getGameMode() != GameMode.SURVIVAL)
                 return;
 
-            WorldBorder worldborder = world.getWorldBorder();
-            double size = worldborder.getSize() / 2 - .85;
-            worldborder.setCenter(worldborder.getCenter().add(vel.clone().multiply(1d / 20d)));
-            BoundingBox box = BoundingBox.of(worldborder.getCenter(), size, Float.MAX_VALUE, size);
-            moveOtherPlayers(world.getPlayers().stream(), world, size, box, 2);
+            Vector v = p.getVelocity();
+            double velX = vel.getX() / 20 / 25;
+            double velZ = vel.getZ() / 20 / 25;
+            double vX = v.getX() + velX;
+            double vZ = v.getZ() + velZ;
+            if (Math.abs(vel.getX()) > 2)
+                vX *= .9;
+            if (Math.abs(vel.getZ()) > 2)
+                vZ *= .9;
+            p.setVelocity(new Vector(vX, v.getY(), vZ));
         });
-    }
-
-    private static void moveOtherPlayers(Stream<? extends Player> stream, World world, double size, BoundingBox box, double tpThreshold) {
-        BoundingBox boxIn = BoundingBox.of(box.getCenter(), size, Float.MAX_VALUE, size);
-        BoundingBox boxOut = boxIn.clone().expand(tpThreshold);
-        stream
-                .filter(p -> p.getWorld().equals(world))
-                .forEach(p -> {
-                    Location pLocation = p.getLocation();
-                    Vector pVector = pLocation.toVector();
-                    if (!boxIn.contains(pVector)) {
-                        Vector closest = getClosestPoint(boxIn, pVector);
-                        closest.setY(pLocation.getY());
-                        if (!boxOut.contains(pVector)) {
-                            p.teleport(pLocation.set(closest.getX(), closest.getY(), closest.getZ()));
-                        } else {
-                            Vector vel = closest.subtract(pVector);
-                            vel.setY(p.getVelocity().getY());
-                            p.setVelocity(vel);
-                        }
-                    }
-                });
     }
 
     private static double clamp(double x, double min, double max) {
         return Math.max(min, Math.min(x, max));
-    }
-
-    private static Vector getClosestPoint(BoundingBox box, Vector point) {
-        return new Vector(
-                clamp(point.getX(), box.getMinX(), box.getMaxX()),
-                clamp(point.getY(), box.getMinY(), box.getMaxY()),
-                clamp(point.getZ(), box.getMinZ(), box.getMaxZ())
-        );
     }
 
 }
