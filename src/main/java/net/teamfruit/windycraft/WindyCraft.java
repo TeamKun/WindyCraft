@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public final class WindyCraft extends JavaPlugin {
 
-    private Vector vel;
+    private Vector vel = new Vector();
     private BukkitRunnable task;
 
     @Override
@@ -50,6 +50,27 @@ public final class WindyCraft extends JavaPlugin {
                             .create()
                     );
 
+                    return true;
+                case "velrandom":
+                    double radius = vel.length();
+                    double angle = Math.random() * Math.PI * 2;
+                    vel = new Vector(
+                            radius * Math.sin(angle),
+                            0,
+                            radius * Math.cos(angle)
+                    );
+
+                    sender.sendMessage(new ComponentBuilder()
+                            .append("[かめすたプラグイン] ").color(ChatColor.LIGHT_PURPLE)
+                            .append("風速を " + vel + " m/s にセットした").color(ChatColor.GREEN)
+                            .create()
+                    );
+
+                    Bukkit.broadcast(new ComponentBuilder()
+                            .append("[かめすたプラグイン] ").color(ChatColor.LIGHT_PURPLE)
+                            .append("風上チェンジ！").color(ChatColor.GREEN)
+                            .create()
+                    );
                     return true;
 
                 case "start":
@@ -106,7 +127,7 @@ public final class WindyCraft extends JavaPlugin {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         switch (args.length) {
             case 1:
-                return Stream.of("vel", "start", "stop")
+                return Stream.of("vel", "start", "stop", "velrandom")
                         .filter(e -> e.startsWith(args[0]))
                         .collect(Collectors.toList());
             case 2:
